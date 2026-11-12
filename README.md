@@ -6,6 +6,28 @@
 
 > **Personal, noncommercial use only.** This is source-available software. Selling it, paid hosting, subscriptions, ads, commercial redistribution, wagering, and valuable prizes are prohibited by the [license](LICENSE). It is not affiliated with or endorsed by the NFL, its teams, ESPN, or Apple.
 
+## Take a look
+
+Real website screenshots from an isolated **Sunday Social** demo league. Every player, result, message, and email shown is fictional. Simulated live scores and odds are illustrative, not a current NFL feed. Team badges show the default logo-free configuration.
+
+**Season standings, your weekly checklist, and a spotlight for the weekly winner — Midnight theme.**
+
+[![Season leaderboard with fictional players and a highlighted weekly winner](docs/screenshots/leaderboard.png)](docs/screenshots/leaderboard.png)
+
+| Make your picks · Sunday Field | Player stats & rivalries · Daylight |
+| --- | --- |
+| [![Weekly picks with a kickoff countdown, simulated quarter scores, and revealed league picks](docs/screenshots/picks.png)](docs/screenshots/picks.png) | [![Demo player profile with season totals, head-to-head records, and achievements](docs/screenshots/profile.png)](docs/screenshots/profile.png) |
+
+**The same website on your phone — OLED Black.** No native app is required for these views.
+
+<p align="center">
+  <a href="docs/screenshots/mobile-oled.png"><img src="docs/screenshots/mobile-oled.png" alt="Mobile picks in OLED Black with a simulated live score and the selected team" width="280"></a>
+  &nbsp;&nbsp;
+  <a href="docs/screenshots/mobile-chat.png"><img src="docs/screenshots/mobile-chat.png" alt="Mobile league chat with fictional messages from demo players" width="280"></a>
+</p>
+
+Click any screenshot to view it at full resolution. More themes are available in player preferences.
+
 ## The whole week in one place
 
 | For players | For commissioners |
