@@ -1,0 +1,172 @@
+@import './themes.css';
+@import './theme-details.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 8%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 142 71% 45%;
+    --primary-foreground: 144 100% 7%;
+    --secondary: 217 32% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 32% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 32% 17%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 32% 18%;
+    --input: 217 32% 18%;
+    --ring: 142 71% 45%;
+    --radius: 0.5rem;
+  }
+
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background: radial-gradient(ellipse at top, hsl(var(--secondary) / .55), transparent 65%), hsl(var(--background));
+    min-height: 100vh;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+[data-reduced-motion='true'] *, [data-reduced-motion='true'] *::before, [data-reduced-motion='true'] *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+.mobile-nav-scroll {
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-nav-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+ * iOS home-screen apps using a translucent status bar render into the full
+ * screen. Keep the header background edge-to-edge while placing its controls
+ * below the notch/Dynamic Island. The picks toolbar must follow the resulting
+ * header height when it becomes sticky.
+ */
+.app-navigation {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.app-sticky-under-navigation {
+  top: calc(4rem + 3px + env(safe-area-inset-top, 0px));
+}
+
+.chat-dock {
+  bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+.chat-panel {
+  height: min(32rem, calc(100dvh - 5rem - env(safe-area-inset-top) - env(safe-area-inset-bottom)));
+}
+
+@media (min-width: 640px) {
+  .chat-dock {
+    bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+
+  .chat-panel {
+    height: min(32rem, calc(100dvh - 6rem - env(safe-area-inset-top) - env(safe-area-inset-bottom)));
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-card text-card-foreground border border-border rounded-xl;
+    box-shadow: 0 8px 28px hsl(var(--background) / .18);
+  }
+  
+  .nav-link {
+    @apply text-muted-foreground hover:text-foreground transition-colors;
+  }
+  
+  .picked-correct {
+    @apply border-green-500/60 bg-green-500/10;
+  }
+  
+  .picked-wrong {
+    @apply border-red-500/60 bg-red-500/10;
+  }
+  
+  .team-button-selected {
+    @apply ring-2 ring-offset-2 ring-offset-background scale-105;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / .5);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Football pulse animation */
+@keyframes football-bounce {
+  0%, 100% { transform: translateY(0) rotate(-10deg); }
+  50% { transform: translateY(-4px) rotate(10deg); }
+}
+
+.football-live {
+  animation: football-bounce 0.8s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--foreground)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Gold/Silver/Bronze for top 3 */
+.rank-gold {
+  color: #FFD700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.rank-silver {
+  color: #C0C0C0;
+  text-shadow: 0 0 10px rgba(192, 192, 192, 0.3);
+}
+
+.rank-bronze {
+  color: #CD7F32;
+  text-shadow: 0 0 10px rgba(205, 127, 50, 0.3);
+}

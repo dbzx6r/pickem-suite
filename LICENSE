@@ -1,0 +1,66 @@
+Pickem Suite Personal Noncommercial License 1.0
+Copyright (c) 2026 dbzx6r and contributors. All rights reserved except as granted below.
+
+1. Covered material
+This license applies to the original Pickem Suite source code, documentation,
+and original artwork supplied under this license (the Software). Third-party
+software and content remain subject to their own licenses and are excluded from
+this grant. See THIRD_PARTY_NOTICES.md.
+
+2. Permission
+Subject to these conditions, you may inspect, run, copy, modify, and redistribute
+the Software and modifications, free of charge, solely for personal,
+noncommercial purposes: private entertainment, private friend/family leagues,
+individual learning, research, experimentation, and hobby self-hosting. A private
+coworker league is permitted only when operated voluntarily by individuals without
+company sponsorship, payment, business promotion, or commercial benefit.
+
+3. Commercial use prohibited
+No permission is granted to use the Software or a derivative work for commercial
+purposes, directly or indirectly. You must not sell, rent, sublicense for a fee,
+commercially distribute, or offer paid hosting or managed services for it; charge
+for league creation, membership, access, features, support bundled with access, or
+use; monetize it through advertising, sponsorship, affiliate revenue, paid
+promotions, or the sale of user data; incorporate it into a commercial product or
+service; or use it to promote a business. Removing branding, changing a name,
+forking, or modifying the code does not remove these restrictions. No commercial
+license is offered by this repository. Rights not expressly granted are reserved.
+
+4. No wagering or valuable prizes
+You must not use the Software to accept, arrange, record, settle, or facilitate
+wagers, entry fees, payouts, or prizes of money or anything of value. Friendly
+predictions are for bragging rights only. This restriction includes goods,
+services, gift cards, and stakes settled outside the Software.
+
+5. Redistribution and changes
+You may share original or modified copies without charge only under this same
+license, with this license and all copyright and third-party notices intact.
+Identify material changes and do not imply endorsement by the original authors.
+You may not grant recipients rights to the covered material beyond this license.
+These restrictions do not change the independent licenses of third-party parts.
+
+6. Third-party rights
+No NFL, team, ESPN, Apple, or other third-party copyright, trademark, publicity,
+data, service, or patent rights are granted. No right to use a contributor's name
+or branding to endorse a product is granted. You must obtain any permissions
+required for your deployment. Personal or nonprofit use is not a representation
+that third-party content may lawfully be used. Statutory rights that cannot be
+restricted by license are unaffected.
+
+7. Termination
+The permissions in this license terminate automatically upon violation. After
+termination you must stop exercising the permissions granted by this license.
+Termination does not limit any other rights or remedies of a rights holder.
+
+8. Disclaimer and limitation of liability
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS" AND
+"AS AVAILABLE", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, ACCURACY, SECURITY,
+AVAILABILITY, OR NONINFRINGEMENT. THE AUTHORS AND COPYRIGHT HOLDERS SHALL NOT
+BE LIABLE FOR CLAIMS, DAMAGES, OR OTHER LIABILITY ARISING FROM THE SOFTWARE OR
+ITS USE, WHETHER IN CONTRACT, TORT, OR OTHERWISE. YOU ARE RESPONSIBLE FOR YOUR
+DEPLOYMENT, BACKUPS, USERS, DATA, AND LEGAL COMPLIANCE.
+
+This is a source-available license with commercial-use restrictions, not an
+OSI-approved open-source license. It does not claim to prevent all unauthorized
+copying or guarantee enforcement in every jurisdiction.

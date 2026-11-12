@@ -1,0 +1,468 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  nativeDevices NativeDevice[]
+  liveActivities LiveActivity[]
+  id                     String                 @id @default(cuid())
+  email                  String                 @unique
+  password               String
+  role                   Role                   @default(USER)
+  profile                Profile?               @relation(fields: [profileId], references: [id])
+  profileId              String?                @unique
+  picks                  Pick[]
+  tiebreakers            Tiebreaker[]
+  weeklyScores           WeeklyScore[]
+  apiKey                 String?                @unique
+  mustChangePassword     Boolean                @default(false)
+  failedLoginAttempts    Int                    @default(0)
+  lockedUntil            DateTime?
+  sessionVersion         Int                    @default(0)
+  lastLoginAt            DateTime?
+  passwordChangedAt      DateTime?
+  createdAt              DateTime               @default(now())
+  chatMessages           ChatMessage[]
+  userAchievements       UserAchievement[]
+  slateAwards            SlateAward[]
+  sideBetsProposed       SideBet[]              @relation("SideBetProposer")
+  sideBetsAccepted       SideBet[]              @relation("SideBetAcceptor")
+  notifications          Notification[]
+  auditLogs              AuditLog[]             @relation("AuditActor")
+  pushSubscriptions      PushSubscription[]
+  notificationDeliveries NotificationDelivery[]
+  pickRevisions          PickRevision[]
+  chatReactions          ChatReaction[]
+  chatMentions           ChatMention[]
+}
+
+model Profile {
+  id                      String   @id @default(cuid())
+  displayName             String
+  avatarUrl               String?
+  theme                   String   @default("midnight")
+  favoriteTeam            String?
+  notificationPreferences Json     @default("{}")
+  reducedMotion           Boolean  @default(false)
+  user                    User?
+  createdAt               DateTime @default(now())
+}
+
+model LeagueSettings {
+  id                  String   @id @default("default")
+  leagueName          String   @default("NFL Picks")
+  pickWindowWeeks     Int      @default(2)
+  picksRevealPolicy   String   @default("GAME_START")
+  registrationEnabled Boolean  @default(false)
+  chatEnabled         Boolean  @default(true)
+  reminderHours       Int      @default(24)
+  reminderMinutes     String   @default("1440,60,15")
+  newsEnabled         Boolean  @default(true)
+  updatedAt           DateTime @updatedAt
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  href      String?
+  dedupeKey String?   @unique
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt])
+}
+
+model PushSubscription {
+  id            String    @id @default(cuid())
+  userId        String
+  endpoint      String    @unique
+  p256dh        String
+  auth          String
+  userAgent     String?
+  enabled       Boolean   @default(true)
+  failureCount  Int       @default(0)
+  lastSuccessAt DateTime?
+  lastFailureAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, enabled])
+}
+
+model NotificationDelivery {
+  id        String    @id @default(cuid())
+  userId    String
+  weekId    String?
+  gameId    String?
+  type      String
+  channel   String
+  status    String
+  dedupeKey String    @unique
+  error     String?
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@index([weekId, type])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  targetType String
+  targetId   String?
+  details    Json?
+  createdAt  DateTime @default(now())
+  actor      User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([actorId])
+}
+
+model RateLimitBucket {
+  key       String   @id
+  count     Int      @default(0)
+  resetAt   DateTime
+  updatedAt DateTime @updatedAt
+}
+
+model Season {
+  id          String    @id @default(cuid())
+  year        Int
+  seasonType  String    @default("REGULAR")
+  isActive    Boolean   @default(false)
+  isSandbox   Boolean   @default(false)
+  weeks       Week[]
+  activatedAt DateTime?
+  archivedAt  DateTime?
+
+  @@unique([year, seasonType, isSandbox])
+}
+
+model SeasonRollover {
+  id           String   @id @default(cuid())
+  fromSeasonId String?
+  toSeasonId   String
+  trigger      String
+  summary      Json?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([toSeasonId])
+}
+
+model Week {
+  id               String         @id @default(cuid())
+  season           Season         @relation(fields: [seasonId], references: [id])
+  seasonId         String
+  weekNumber       Int
+  lockTime         DateTime
+  doubleGameId     String?
+  tiebreakerGameId String?
+  isFinal          Boolean        @default(false)
+  recapVisible     Boolean        @default(false)
+  games            Game[]
+  picks            Pick[]
+  tiebreakers      Tiebreaker[]
+  weeklyScores     WeeklyScore[]
+  pickRevisions    PickRevision[]
+
+  @@unique([seasonId, weekNumber])
+}
+
+model Game {
+  liveActivities LiveActivity[]
+  id                   String         @id @default(cuid())
+  week                 Week           @relation(fields: [weekId], references: [id])
+  weekId               String
+  homeTeam             String
+  awayTeam             String
+  homeScore            Int?
+  awayScore            Int?
+  homeScoreQ1          Int?
+  homeScoreQ2          Int?
+  homeScoreQ3          Int?
+  homeScoreQ4          Int?
+  awayScoreQ1          Int?
+  awayScoreQ2          Int?
+  awayScoreQ3          Int?
+  awayScoreQ4          Int?
+  winnerTeam           String?
+  startTime            DateTime
+  isFinal              Boolean        @default(false)
+  espnGameId           String?
+  period               Int?
+  clock                String?
+  possession           String?
+  downDistance         String?
+  homeTimeOfPossession String?
+  awayTimeOfPossession String?
+  statusState          String?
+  sandboxSituation     Json?
+  venue                String?
+  spreadLine           String?
+  overUnder            Float?
+  homeRecord           String?
+  awayRecord           String?
+  weather              String?
+  broadcast            String?
+  oddsProvider         String?
+  contextUpdatedAt     DateTime?
+  injurySummary        Json?
+  teamStats            Json?
+  boxScore             Json?
+  picks                Pick[]
+  pickRevisions        PickRevision[]
+  oddsSnapshots        OddsSnapshot[]
+}
+
+model OddsSnapshot {
+  id         String   @id @default(cuid())
+  gameId     String
+  spreadLine String?
+  overUnder  Float?
+  provider   String?
+  capturedAt DateTime @default(now())
+  game       Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([gameId, capturedAt])
+}
+
+model Pick {
+  id           String         @id @default(cuid())
+  user         User           @relation(fields: [userId], references: [id])
+  userId       String
+  week         Week           @relation(fields: [weekId], references: [id])
+  weekId       String
+  game         Game           @relation(fields: [gameId], references: [id])
+  gameId       String
+  pickedTeam   String
+  isAutoPick   Boolean        @default(false)
+  editCount    Int            @default(0)
+  isCorrect    Boolean?
+  pointsEarned Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  revisions    PickRevision[]
+
+  @@unique([userId, gameId])
+}
+
+model PickRevision {
+  id           String   @id @default(cuid())
+  pickId       String
+  userId       String
+  weekId       String
+  gameId       String
+  previousTeam String?
+  pickedTeam   String
+  source       String   @default("web")
+  createdAt    DateTime @default(now())
+  pick         Pick     @relation(fields: [pickId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  week         Week     @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  game         Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([userId, weekId, createdAt])
+  @@index([pickId, createdAt])
+}
+
+model Tiebreaker {
+  id             String   @id @default(cuid())
+  user           User     @relation(fields: [userId], references: [id])
+  userId         String
+  week           Week     @relation(fields: [weekId], references: [id])
+  weekId         String
+  guessedTotal   Int
+  difference     Int?
+  tiebreakerRank Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId, weekId])
+}
+
+model WeeklyScore {
+  id                  String  @id @default(cuid())
+  user                User    @relation(fields: [userId], references: [id])
+  userId              String
+  week                Week    @relation(fields: [weekId], references: [id])
+  weekId              String
+  points              Int     @default(0)
+  tiebreakerUsed      Boolean @default(false)
+  finalRank           Int?
+  randomTiebroken     Boolean @default(false)
+  adminOverridePoints Int?
+  adminOverrideNote   String?
+
+  @@unique([userId, weekId])
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  message   String
+  isActive  Boolean  @default(false)
+  adminId   String
+  createdAt DateTime @default(now())
+}
+
+model TiebreakerAudit {
+  id         String   @id @default(cuid())
+  weekId     String
+  userId1    String
+  userId2    String
+  winnerId   String
+  randomSeed String
+  createdAt  DateTime @default(now())
+}
+
+model ChatMessage {
+  id         String         @id @default(cuid())
+  user       User           @relation(fields: [userId], references: [id])
+  userId     String
+  text       String
+  appSource  String         @default("nfl")
+  replyToId  String?
+  pinnedAt   DateTime?
+  pinnedById String?
+  createdAt  DateTime       @default(now())
+  replyTo    ChatMessage?   @relation("ChatReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies    ChatMessage[]  @relation("ChatReplies")
+  reactions  ChatReaction[]
+  mentions   ChatMention[]
+
+  @@index([createdAt])
+  @@index([pinnedAt])
+}
+
+model ChatReaction {
+  id        String      @id @default(cuid())
+  messageId String
+  userId    String
+  emoji     String
+  createdAt DateTime    @default(now())
+  message   ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+}
+
+model ChatMention {
+  id        String      @id @default(cuid())
+  messageId String
+  userId    String
+  createdAt DateTime    @default(now())
+  message   ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@index([userId, createdAt])
+}
+
+model Achievement {
+  id          String            @id
+  name        String
+  description String
+  icon        String
+  earned      UserAchievement[]
+}
+
+model UserAchievement {
+  id            String      @id @default(cuid())
+  userId        String
+  achievementId String
+  earnedAt      DateTime    @default(now())
+  slateId       String?
+  user          User        @relation(fields: [userId], references: [id])
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+
+  @@unique([userId, achievementId])
+}
+
+model SlateAward {
+  id        String   @id @default(cuid())
+  weekId    String? // NFL: week identifier
+  slateId   String? // MLB: slate identifier
+  userId    String
+  awardType String
+  metadata  Json?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([weekId, awardType])
+  @@unique([slateId, awardType])
+}
+
+model SideBet {
+  id         String    @id @default(cuid())
+  proposerId String
+  acceptorId String
+  sport      String
+  gameId     String?
+  mlbGameId  String?
+  betType    String
+  betDetails Json
+  stake      String?
+  status     String    @default("pending")
+  winnerId   String?
+  resolvedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  proposer   User      @relation("SideBetProposer", fields: [proposerId], references: [id])
+  acceptor   User      @relation("SideBetAcceptor", fields: [acceptorId], references: [id])
+}
+
+// Device activity tokens expire with ActivityKit's eight-hour lifetime.
+
+model LiveActivity {
+  activityId String @id
+  userId String
+  gameId String
+  sessionKey String
+  sessionVersion Int
+  token String @unique
+  environment String
+  expiresAt DateTime
+  lastSentAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  @@index([gameId])
+  @@index([expiresAt])
+}
+
+model NativeDevice {
+  id String @id
+  userId String
+  sessionKey String
+  sessionVersion Int
+  token String
+  environment String
+  expiresAt DateTime
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([token, environment])
+  @@index([userId])
+  @@index([expiresAt])
+}

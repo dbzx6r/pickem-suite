@@ -1,0 +1,75 @@
+name: Verify
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-ci-only
+          POSTGRES_DB: nflpicks_ui_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:disposable-ci-only@127.0.0.1:5432/nflpicks_ui_test
+      AUTH_SECRET: disposable-ci-only-never-use-in-production
+      NEXTAUTH_URL: http://127.0.0.1:3113
+      NEXTAUTH_URL_INTERNAL: http://127.0.0.1:3113
+      AUTH_TRUST_HOST: 'true'
+      ENABLE_ESPN_DATA: 'false'
+      NEXT_PUBLIC_TEAM_LOGOS_ENABLED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npx prisma generate
+      - run: npx prisma migrate deploy
+      - run: npm test
+      - run: npx tsc --noEmit --pretty false
+      - run: npm run lint
+      - run: node scripts/seed-ui-test.cjs
+      - run: npm run test:schedule
+      - run: npm run test:mobile
+      - name: Native reminder database regression
+        env:
+          PGPASSWORD: disposable-ci-only
+        run: |
+          createdb -h 127.0.0.1 -U postgres nflpicks_reminder_test
+          export DATABASE_URL=postgresql://postgres:disposable-ci-only@127.0.0.1:5432/nflpicks_reminder_test
+          npx prisma migrate deploy
+          TS_NODE_COMPILER_OPTIONS='{"module":"CommonJS","moduleResolution":"Node"}' node --test -r ts-node/register/transpile-only scripts/test-native-reminders-db.ts
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run test:ui
+      - name: Bootstrap idempotency
+        env:
+          PGPASSWORD: disposable-ci-only
+          ADMIN_EMAIL: commissioner@example.invalid
+          ADMIN_SEED_PASSWORD: Disposable-Bootstrap-2026!
+        run: |
+          createdb -h 127.0.0.1 -U postgres pickem_bootstrap_test
+          export DATABASE_URL=postgresql://postgres:disposable-ci-only@127.0.0.1:5432/pickem_bootstrap_test
+          npx prisma migrate deploy
+          node prisma/seed.cjs
+          node prisma/seed.cjs
+          node scripts/check-bootstrap.cjs
+      - name: Publication hygiene
+        run: node scripts/check-publication.mjs
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: synthetic-test-results
+          path: playwright-report/
+          retention-days: 7

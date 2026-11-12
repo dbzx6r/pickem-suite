@@ -1,0 +1,88 @@
+name: pickem-suite
+x-app-env: &app-env
+  DATABASE_URL: postgresql://pickem:${POSTGRES_PASSWORD:?Run scripts/configure.sh first}@postgres:5432/pickem
+  AUTH_SECRET: ${AUTH_SECRET:?Run scripts/configure.sh first}
+  AUTH_URL: ${APP_URL:-http://localhost:3000}
+  NEXTAUTH_URL: ${APP_URL:-http://localhost:3000}
+  NEXTAUTH_URL_INTERNAL: http://localhost:3000
+  AUTH_TRUST_HOST: "true"
+  CRON_SECRET: ${CRON_SECRET:?Run scripts/configure.sh first}
+  NEXT_PUBLIC_TEAM_LOGOS_ENABLED: ${NEXT_PUBLIC_TEAM_LOGOS_ENABLED:-false}
+  ENABLE_ESPN_DATA: ${ENABLE_ESPN_DATA:-false}
+  VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+  VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+  VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:commissioner@example.invalid}
+  AUTOPICK_ALLOWED_USER_ID: ${AUTOPICK_ALLOWED_USER_ID:-}
+  LIVE_ACTIVITIES_ENABLED: ${LIVE_ACTIVITIES_ENABLED:-false}
+  PICK_REMINDERS_ENABLED: ${PICK_REMINDERS_ENABLED:-false}
+  APNS_BUNDLE_ID: ${APNS_BUNDLE_ID:-}
+  APNS_TEAM_ID: ${APNS_TEAM_ID:-}
+  APNS_PRODUCTION_KEY_ID: ${APNS_PRODUCTION_KEY_ID:-}
+  APNS_PRODUCTION_KEY_PATH: ${APNS_PRODUCTION_KEY_PATH:-}
+  APNS_SANDBOX_KEY_ID: ${APNS_SANDBOX_KEY_ID:-}
+  APNS_SANDBOX_KEY_PATH: ${APNS_SANDBOX_KEY_PATH:-}
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pickem
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run scripts/configure.sh first}
+      POSTGRES_DB: pickem
+    volumes: [database:/var/lib/postgresql/data]
+    networks: [database]
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U pickem -d pickem]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  setup:
+    profiles: [tools]
+    build: {context: ., target: tools}
+    environment:
+      <<: *app-env
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-commissioner@example.invalid}
+      ADMIN_SEED_PASSWORD: ${ADMIN_SEED_PASSWORD:-}
+      LEAGUE_NAME: ${LEAGUE_NAME:-Pickem Suite}
+      SEASON_YEAR: ${SEASON_YEAR:-}
+    command: [sh, -c, "npx prisma migrate deploy && node prisma/seed.cjs"]
+    networks: [database]
+    depends_on:
+      postgres: {condition: service_healthy}
+  app:
+    build:
+      context: .
+      target: runner
+      args:
+        NEXT_PUBLIC_TEAM_LOGOS_ENABLED: ${NEXT_PUBLIC_TEAM_LOGOS_ENABLED:-false}
+    environment: *app-env
+    ports: ["127.0.0.1:${APP_PORT:-3000}:3000"]
+    volumes: [avatars:/app/uploads]
+    networks: [database, outbound]
+    depends_on:
+      postgres: {condition: service_healthy}
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+  scheduler:
+    image: curlimages/curl:8.12.1
+    environment:
+      CRON_SECRET: ${CRON_SECRET:?Run scripts/configure.sh first}
+    entrypoint: [/bin/sh, /scheduler.sh]
+    volumes: [./scripts/scheduler.sh:/scheduler.sh:ro]
+    networks: [database]
+    depends_on:
+      app: {condition: service_healthy}
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+networks:
+  database: {internal: true}
+  outbound: {}
+volumes:
+  database: {}
+  avatars: {}
