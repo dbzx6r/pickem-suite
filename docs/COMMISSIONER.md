@@ -1,5 +1,7 @@
 # Commissioner handbook
 
+Starting after Week 1? Read [Starting midseason](MIDSEASON.md) before creating weeks or importing a schedule.
+
 ## First week
 
 1. Sign in as the administrator and replace the bootstrap password.

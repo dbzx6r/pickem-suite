@@ -1,10 +1,14 @@
+# Pickem Suite — Self-hosted NFL Pickem Platform
+
 <p align="center"><img src="docs/assets/banner.svg" alt="Pickem Suite — your league, your server, every Sunday" width="960"></p>
 
-<p align="center"><strong>A self-hosted football pick’em clubhouse for your friends.</strong><br>Weekly picks. Live game detail. Season-long rivalries. Your own server.</p>
+<p align="center"><strong>A self-hosted NFL pick’em website for your friends.</strong><br>Weekly picks. Live game detail. Season-long rivalries. Your own server.</p>
 
 <p align="center"><a href="docs/SETUP.md">Install</a> · <a href="docs/COMMISSIONER.md">Run your league</a> · <a href="docs/PLAYERS.md">Player guide</a> · <a href="docs/NATIVE_INTEGRATION.md">Native integration</a> · <a href="docs/LEGAL.md">Usage & rights</a></p>
 
 > **Personal, noncommercial use only.** This is source-available software. Selling it, paid hosting, subscriptions, ads, commercial redistribution, wagering, and valuable prizes are prohibited by the [license](LICENSE). It is not affiliated with or endorsed by the NFL, its teams, ESPN, or Apple.
+
+Pickem Suite is an NFL pickem (pickems / pick’em) league platform you run on your own server with Docker and PostgreSQL. Create a private football prediction league with weekly picks, season leaderboards, live game detail, chat, and mobile-friendly themes. Free personal, noncommercial self-hosting is permitted under the project license.
 
 ## Take a look
 
@@ -62,6 +66,12 @@ Visit **http://localhost:3000** on the host. Sign in with `ADMIN_EMAIL` and the 
 
 The app binds to loopback. For another device or internet access, configure HTTPS through your own reverse proxy and set `APP_URL` to its exact public origin. Follow the [full setup guide](docs/SETUP.md); simply changing the URL does not expose the app.
 
+## Can I start midseason?
+
+**Yes.** For a new competition, create the current NFL week, add its upcoming games, and start everyone from zero. You do not need to create earlier weeks. If a week is already underway, the simplest fair start is the next full week.
+
+Previous NFL games/results and your league’s previous picks are different kinds of history. The optional feed can backfill published schedules and results; it cannot recover old picks from a spreadsheet or another platform. Manual game entry currently requires a future kickoff, and there is no historical picks/CSV import wizard. See the [midseason setup guide](docs/MIDSEASON.md) for the supported paths and limitations.
+
 ## Choose your content
 
 The default installation uses text team badges and commissioner-managed games. It makes no sports-feed requests. No official team logo files or news archives are bundled.
@@ -77,6 +87,7 @@ Enable third-party content only if you have the necessary permissions. Noncommer
 | Guide | Covers |
 | --- | --- |
 | [Setup](docs/SETUP.md) | Docker, configuration, HTTPS, first login, troubleshooting |
+| [Midseason start](docs/MIDSEASON.md) | Starting now, past results, and historical pick limitations |
 | [Commissioner](docs/COMMISSIONER.md) | Players, schedules, scoring, seasons, sandbox, reminders |
 | [Players](docs/PLAYERS.md) | Picks, tiebreakers, standings, chat, profiles, challenges |
 | [Operations](docs/OPERATIONS.md) | Backup, restore, updates, monitoring, privacy |

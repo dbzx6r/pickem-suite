@@ -59,6 +59,8 @@ Private VPN access is another option, but web push and secure cookies still need
 
 ## 4. Populate your league
 
+Starting during the NFL season is supported. You can begin at the current week without creating earlier weeks; see [Midseason start and historical data](MIDSEASON.md) for the steps and import limitations.
+
 Use **Admin → Users** to create players. Use **Weeks** and **Games** to create a slate manually; all dates should represent the intended real kickoff. See the [commissioner guide](COMMISSIONER.md).
 
 For the optional sports adapter, review [rights and limitations](LEGAL.md), set `ENABLE_ESPN_DATA=true`, recreate the app, and run the sync action in Admin. The internal scheduler repeats sync and reminders every five minutes. A failed feed is not a reason to invent results—verify games manually. Enable news separately in league settings if wanted.
