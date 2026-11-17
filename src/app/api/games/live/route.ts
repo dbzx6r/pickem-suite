@@ -1,3 +1,4 @@
+import { ScheduleValidationError } from '@/lib/schedule-validation';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { fetchEspnScoreboard } from '@/lib/espn';
@@ -112,7 +113,11 @@ export async function GET(request: NextRequest) {
       week.weekNumber,
       week.season.year,
       espnSeasonType(week.season.seasonType),
-    );
+    ).catch(error => {
+      // Keep the last verified slate visible when the provider sends invalid data.
+      if (error instanceof ScheduleValidationError) return [];
+      throw error;
+    });
 
     // Merge ESPN data with DB data
     const bonus = await prisma.auditLog.findUnique({ where: { id: `double-points:${week.id}` }, select: { details: true } });

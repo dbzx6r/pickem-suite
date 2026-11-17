@@ -1,3 +1,4 @@
+import { assertScoreboardSchedule, ScheduleValidationError } from './schedule-validation';
 import { LivePlayerCategory, LiveTeamStat, parseEspnLiveGameStats } from '@/lib/live-game-stats';
 import { normalizeEspnClock } from '@/lib/espn-clock';
 
@@ -162,6 +163,7 @@ export async function fetchCurrentNFLWeek(): Promise<CurrentNFLWeek | null> {
     return { weekNumber, year, seasonType, games };
   } catch (error) {
     console.error('ESPN current week fetch error:', error);
+    if (error instanceof ScheduleValidationError) throw error;
     return null;
   }
 }
@@ -179,6 +181,7 @@ export async function fetchEspnScoreboard(
     if (!res.ok) throw new Error(`ESPN API error: ${res.status}`);
     const data = await res.json();
 
+    assertScoreboardSchedule(data, year, week, seasonType);
     const games = (data.events || []).map((event: EspnGame) => {
       const comp = event.competitions[0];
       const home = comp.competitors.find((c) => c.homeAway === 'home');
@@ -314,6 +317,7 @@ export async function fetchEspnScoreboard(
     return games;
   } catch (error) {
     console.error('ESPN scoreboard fetch error:', error);
+    if (error instanceof ScheduleValidationError) throw error;
     return [];
   }
 }

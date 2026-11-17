@@ -1,3 +1,4 @@
+import { assertSeasonKickoff } from './schedule-validation';
 import { deliverLiveActivities } from './live-activities';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
@@ -125,6 +126,7 @@ async function syncPublishedWeek(
   results: string[],
 ) {
   if (espnGames.length === 0) return null;
+  for (const game of espnGames) assertSeasonKickoff(game.startTime, season.year);
 
   const sortedGames = [...espnGames].sort(
     (a, b) => a.startTime.getTime() - b.startTime.getTime(),
